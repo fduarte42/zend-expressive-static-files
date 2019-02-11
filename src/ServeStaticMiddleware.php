@@ -14,8 +14,8 @@ use Zend\Diactoros\Stream;
 
 class ServeStaticMiddleware implements MiddlewareInterface
 {
-    /** @var \SplStack */
-    protected $fileSystemAssetDirectoryStack;
+    /** @var array */
+    protected $fileSystemAssetDirectories;
 
     /** @var array */
     protected $options;
@@ -28,6 +28,7 @@ class ServeStaticMiddleware implements MiddlewareInterface
     public function __construct($fileSystemAssetDirectories, array $options = [])
     {
         $fileSystemAssetDirectories = is_array($fileSystemAssetDirectories) ? $fileSystemAssetDirectories : [$fileSystemAssetDirectories];
+        $this->fileSystemAssetDirectories = $fileSystemAssetDirectories;
 
         $this->options = array_merge(
             [
@@ -41,13 +42,6 @@ class ServeStaticMiddleware implements MiddlewareInterface
 
         if (!array_key_exists('contentTypes', $this->options)) {
             $this->options['contentTypes'] = ContentTypes::DEFAULT_CONTENT_TYPES;
-        }
-
-        $this->fileSystemAssetDirectoryStack = new \SplStack();
-        $this->fileSystemAssetDirectoryStack->setIteratorMode(SplDoublyLinkedList::IT_MODE_KEEP);
-
-        foreach ($fileSystemAssetDirectories as $fileSystemAssetDirectory) {
-            $this->fileSystemAssetDirectoryStack->push($fileSystemAssetDirectory);
         }
     }
 
@@ -69,7 +63,7 @@ class ServeStaticMiddleware implements MiddlewareInterface
         }
 
 
-        foreach ($this->fileSystemAssetDirectoryStack as $fileSystemAssetDirectory) {
+        foreach ($this->fileSystemAssetDirectories as $fileSystemAssetDirectory) {
             // Build filePath
             $filePath = realpath($fileSystemAssetDirectory . $uriSubPath);
 

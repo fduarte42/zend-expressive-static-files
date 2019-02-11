@@ -63,8 +63,8 @@ class ServeStaticMiddlewareTest extends TestCase
     public function testMultipleAssetDirectories()
     {
         $filesSystemAssetDirectories = [
-            __DIR__ . '/public-test',
-            __DIR__ . '/public-test2'
+            __DIR__ . '/public-test2',
+            __DIR__ . '/public-test'
         ];
 
         $unit = new ServeStaticMiddleware($filesSystemAssetDirectories);
@@ -95,8 +95,8 @@ class ServeStaticMiddlewareTest extends TestCase
     public function testMultipleAssetDirectoriesWithOverride()
     {
         $filesSystemAssetDirectories = [
-            __DIR__ . '/public-test',
-            __DIR__ . '/public-test2'
+            __DIR__ . '/public-test2',
+            __DIR__ . '/public-test'
         ];
 
         $unit = new ServeStaticMiddleware($filesSystemAssetDirectories);
