@@ -59,4 +59,68 @@ class ServeStaticMiddlewareTest extends TestCase
             ['content-type' => ['application/json']]
         );
     }
+
+    public function testMultipleAssetDirectories()
+    {
+        $filesSystemAssetDirectories = [
+            __DIR__ . '/public-test',
+            __DIR__ . '/public-test2'
+        ];
+
+        $unit = new ServeStaticMiddleware($filesSystemAssetDirectories);
+        $request = new ServerRequest([], [], 'https://example.com/test2.json', 'GET');
+
+        /** @var RequestHandlerInterface|MockObject $mockRequestHandler */
+        $mockRequestHandler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
+
+        /**
+         * @var $responseFromUnit ResponseInterface
+         */
+        $responseFromUnit = $unit->process($request, $mockRequestHandler);
+
+        $expectedFileContents = file_get_contents(__DIR__ . '/public-test2/test2.json');
+
+        $responseFromUnit->getBody()->rewind();
+        $this->assertEquals(
+            $expectedFileContents,
+            $responseFromUnit->getBody()->getContents()
+        );
+
+        $this->assertEquals(
+            $responseFromUnit->getHeaders(),
+            ['content-type' => ['application/json']]
+        );
+    }
+
+    public function testMultipleAssetDirectoriesWithOverride()
+    {
+        $filesSystemAssetDirectories = [
+            __DIR__ . '/public-test',
+            __DIR__ . '/public-test2'
+        ];
+
+        $unit = new ServeStaticMiddleware($filesSystemAssetDirectories);
+        $request = new ServerRequest([], [], 'https://example.com/test.json', 'GET');
+
+        /** @var RequestHandlerInterface|MockObject $mockRequestHandler */
+        $mockRequestHandler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
+
+        /**
+         * @var $responseFromUnit ResponseInterface
+         */
+        $responseFromUnit = $unit->process($request, $mockRequestHandler);
+
+        $expectedFileContents = file_get_contents(__DIR__ . '/public-test2/test.json');
+
+        $responseFromUnit->getBody()->rewind();
+        $this->assertEquals(
+            $expectedFileContents,
+            $responseFromUnit->getBody()->getContents()
+        );
+
+        $this->assertEquals(
+            $responseFromUnit->getHeaders(),
+            ['content-type' => ['application/json']]
+        );
+    }
 }

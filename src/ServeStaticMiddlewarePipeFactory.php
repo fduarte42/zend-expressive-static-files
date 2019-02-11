@@ -17,13 +17,16 @@ class ServeStaticMiddlewarePipeFactory
      * Example config:
      * 'serve_static' => [
      *      '/fun-module/assets' => [
-     *          'fileSystemAssetDirectory' => __DIR__ . '/../vendor/fund-module/public',
+     *          'fileSystemAssetDirectory' => [
+     *                  __DIR__ . '/../vendor/fund-module/public'
+     *          ],
      *          'publicCachePath' => __DIR__ . '/../public/fun-module/assets',
      *          'headers' => [],
      *      ]
      *  ]
      *
      * @param ContainerInterface $container
+     *
      * @return MiddlewareInterface
      */
     public function __invoke(ContainerInterface $container): MiddlewareInterface

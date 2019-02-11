@@ -13,19 +13,21 @@ use Zend\Diactoros\Stream;
 
 class ServeStaticMiddleware implements MiddlewareInterface
 {
-    /** @var string */
-    protected $fileSystemAssetDirectory;
+    /** @var \SplStack */
+    protected $fileSystemAssetDirectoryStack;
 
     /** @var array */
     protected $options;
 
     /**
      * ServeStaticMiddleware constructor.
-     * @param $fileSystemAssetDirectory
+     * @param array|string $fileSystemAssetDirectories
      * @param array $options
      */
-    public function __construct(string $fileSystemAssetDirectory, array $options = [])
+    public function __construct($fileSystemAssetDirectories, array $options = [])
     {
+        $fileSystemAssetDirectories = is_array($fileSystemAssetDirectories) ? $fileSystemAssetDirectories : [$fileSystemAssetDirectories];
+
         $this->options = array_merge(
             [
                 'publicCachePath' => null,
@@ -40,7 +42,10 @@ class ServeStaticMiddleware implements MiddlewareInterface
             $this->options['contentTypes'] = ContentTypes::DEFAULT_CONTENT_TYPES;
         }
 
-        $this->fileSystemAssetDirectory = $fileSystemAssetDirectory;
+        $this->fileSystemAssetDirectoryStack = new \SplStack();
+        foreach ($fileSystemAssetDirectories as $fileSystemAssetDirectory) {
+            $this->fileSystemAssetDirectoryStack->push($fileSystemAssetDirectory);
+        }
     }
 
     /**
@@ -60,50 +65,57 @@ class ServeStaticMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        // Build filePath
-        $filePath = realpath($this->fileSystemAssetDirectory . $uriSubPath);
 
-        // Check for invalid path
-        if ($filePath == false) {
-            return $handler->handle($request);
-        }
+        foreach ($this->fileSystemAssetDirectoryStack as $fileSystemAssetDirectory) {
+            // Build filePath
+            $filePath = realpath($fileSystemAssetDirectory . $uriSubPath);
 
-        // Ensure someone isn't using dots to go backward past the asset root folder
-        if (!strpos($filePath, realpath($this->fileSystemAssetDirectory)) === 0) {
-            return $handler->handle($request);
-        }
-
-        // Ensure the file exists and is not a directory
-        if (!is_file($filePath)) {
-            return $handler->handle($request);
-        }
-
-        // Write to publicCachePath if configured
-        if ($this->options['publicCachePath'] !== null) {
-            $writePath = $this->options['publicCachePath'] . $uriSubPath;
-            $writeDir = dirname($writePath);
-            if (!is_dir($writeDir)) {
-                mkdir($writeDir, 0777, true);
+            // Check for invalid path
+            if ($filePath == false) {
+                // look for file in next directory
+                continue;
             }
-            copy($filePath, $writePath);
+
+            // Ensure someone isn't using dots to go backward past the asset root folder
+            if (!strpos($filePath, realpath($fileSystemAssetDirectory)) === 0) {
+                return $handler->handle($request);
+            }
+
+            // Ensure the file exists and is not a directory
+            if (!is_file($filePath)) {
+                // look for file in next directory
+                continue;
+            }
+
+            // Write to publicCachePath if configured
+            if ($this->options['publicCachePath'] !== null) {
+                $writePath = $this->options['publicCachePath'] . $uriSubPath;
+                $writeDir = dirname($writePath);
+                if (!is_dir($writeDir)) {
+                    mkdir($writeDir, 0777, true);
+                }
+                copy($filePath, $writePath);
+            }
+
+            // Build response as stream
+            $body = new Stream($filePath);
+            $response = new Response();
+            $response = $response->withBody($body);
+
+            // Add content type if known
+            $extension = pathinfo($filePath)['extension'];
+            if (array_key_exists($extension, $this->options['contentTypes'])) {
+                $response = $response->withHeader('content-type', $this->options['contentTypes'][$extension]);
+            }
+
+            // Add additional configured headers
+            foreach ($this->options['headers'] as $key => $value) {
+                $response = $response->withHeader($key, $value);
+            }
+
+            return $response;
         }
 
-        // Build response as stream
-        $body = new Stream($filePath);
-        $response = new Response();
-        $response = $response->withBody($body);
-
-        // Add content type if known
-        $extension = pathinfo($filePath)['extension'];
-        if (array_key_exists($extension, $this->options['contentTypes'])) {
-            $response = $response->withHeader('content-type', $this->options['contentTypes'][$extension]);
-        }
-
-        // Add additional configured headers
-        foreach ($this->options['headers'] as $key => $value) {
-            $response = $response->withHeader($key, $value);
-        }
-
-        return $response;
+        return $handler->handle($request);
     }
 }
