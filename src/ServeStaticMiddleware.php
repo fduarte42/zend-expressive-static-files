@@ -8,6 +8,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
+use SplDoublyLinkedList;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 
@@ -43,6 +44,8 @@ class ServeStaticMiddleware implements MiddlewareInterface
         }
 
         $this->fileSystemAssetDirectoryStack = new \SplStack();
+        $this->fileSystemAssetDirectoryStack->setIteratorMode(SplDoublyLinkedList::IT_MODE_KEEP);
+
         foreach ($fileSystemAssetDirectories as $fileSystemAssetDirectory) {
             $this->fileSystemAssetDirectoryStack->push($fileSystemAssetDirectory);
         }
