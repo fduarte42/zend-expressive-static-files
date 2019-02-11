@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Reliv\ServeStatic;
 
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Http\Message\ResponseInterface;
-use SplDoublyLinkedList;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 
