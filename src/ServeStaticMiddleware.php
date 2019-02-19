@@ -8,13 +8,14 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use SplDoublyLinkedList;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 
 class ServeStaticMiddleware implements MiddlewareInterface
 {
-    /** @var array */
-    protected $fileSystemAssetDirectories;
+    /** @var \SplStack */
+    protected $fileSystemAssetDirectoriesStack;
 
     /** @var array */
     protected $options;
@@ -27,7 +28,12 @@ class ServeStaticMiddleware implements MiddlewareInterface
     public function __construct($fileSystemAssetDirectories, array $options = [])
     {
         $fileSystemAssetDirectories = is_array($fileSystemAssetDirectories) ? $fileSystemAssetDirectories : [$fileSystemAssetDirectories];
-        $this->fileSystemAssetDirectories = $fileSystemAssetDirectories;
+
+        $this->fileSystemAssetDirectoriesStack = new \SplStack();
+
+        foreach ($fileSystemAssetDirectories as $fileSystemAssetDirectory) {
+            $this->fileSystemAssetDirectoriesStack->push($fileSystemAssetDirectory);
+        }
 
         $this->options = array_merge(
             [
@@ -62,7 +68,7 @@ class ServeStaticMiddleware implements MiddlewareInterface
         }
 
 
-        foreach ($this->fileSystemAssetDirectories as $fileSystemAssetDirectory) {
+        foreach ($this->fileSystemAssetDirectoriesStack as $fileSystemAssetDirectory) {
             // Build filePath
             $filePath = realpath($fileSystemAssetDirectory . $uriSubPath);
 
