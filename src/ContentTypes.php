@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Reliv\ServeStatic;
+namespace Fduarte42\StaticFiles;
 
 class ContentTypes
 {

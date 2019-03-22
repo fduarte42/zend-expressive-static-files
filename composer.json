@@ -1,5 +1,5 @@
 {
-  "name": "reliv/serve-static",
+  "name": "fduarte42/zend-expressive-static-files",
   "description": "A PSR-15 middleware that serves static assets for you. Is similar to the \"serve-static\" npm package.",
   "type": "library",
   "require": {
@@ -23,7 +23,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "Reliv\\ServeStatic\\": "src/"
+      "Fduarte42\\StaticFiles\\": "src/"
     }
   },
   "require-dev": {

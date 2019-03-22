@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Reliv\ServeStatic;
+namespace Fduarte42\StaticFiles;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -10,7 +10,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Zend\Stratigility\MiddlewarePipe;
 
-class ServeStaticMiddlewarePipe implements MiddlewareInterface
+class StaticFilesMiddlewarePipe implements MiddlewareInterface
 {
     /** @var MiddlewarePipe */
     protected $pipeline;

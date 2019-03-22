@@ -1,6 +1,6 @@
 <?php
 
-namespace Reliv\ServeStatic;
+namespace Fduarte42\StaticFiles;
 
 
 class ConfigProvider
@@ -18,7 +18,7 @@ class ConfigProvider
     {
         return [
             'factories' => [
-                'serve-static-middleware-pipe' => ServeStaticMiddlewarePipeFactory::class,
+                'serve-static-middleware-pipe' => StaticFilesMiddlewarePipeFactory::class,
             ],
         ];
     }

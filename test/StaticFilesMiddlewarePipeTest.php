@@ -1,6 +1,6 @@
 <?php
 
-namespace Reliv\ServeStaticTest;
+namespace Fduarte42\StaticFilesTest;
 
 require_once __DIR__ . '/../src/ContentTypes.php';
 require_once __DIR__ . '/../src/ContentTypes.php';
@@ -10,13 +10,13 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Reliv\ServeStatic\ServeStaticMiddlewarePipeFactory;
+use Fduarte42\StaticFiles\StaticFilesMiddlewarePipeFactory;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 use Zend\Stratigility\Middleware\PathMiddlewareDecorator;
 use Zend\Stratigility\MiddlewarePipeInterface;
 
-class ServeStaticMiddlewarePipeTest extends TestCase
+class StaticFilesMiddlewarePipeTest extends TestCase
 {
 
     public function testReturnsFileContentAndProperHeadersWhenFileExistsAndIsValid()
@@ -33,7 +33,7 @@ class ServeStaticMiddlewarePipeTest extends TestCase
             ->method('get')
             ->with('config')
             ->willReturn([
-                'serve_static' => [
+                'static_files' => [
                     '/' => [
                         'fileSystemAssetDirectory' => __DIR__ . '/public-test',
                     ]
@@ -41,7 +41,7 @@ class ServeStaticMiddlewarePipeTest extends TestCase
             ]);
 
         /** @var MiddlewarePipeInterface $middlewarePipe */
-        $middlewarePipe = (new ServeStaticMiddlewarePipeFactory)($container);
+        $middlewarePipe = (new StaticFilesMiddlewarePipeFactory)($container);
         $request = new ServerRequest([], [], 'https://example.com/test.json', 'GET');
 
         $responseFromDelegate = new Response();
@@ -87,7 +87,7 @@ class ServeStaticMiddlewarePipeTest extends TestCase
             ->method('get')
             ->with('config')
             ->willReturn([
-                'serve_static' => [
+                'static_files' => [
                     '/files' => [
                         'fileSystemAssetDirectory' => __DIR__ . '/public-test',
                     ]
@@ -95,7 +95,7 @@ class ServeStaticMiddlewarePipeTest extends TestCase
             ]);
 
         /** @var MiddlewarePipeInterface $middlewarePipe */
-        $middlewarePipe = (new ServeStaticMiddlewarePipeFactory)($container);
+        $middlewarePipe = (new StaticFilesMiddlewarePipeFactory)($container);
         $request = new ServerRequest([], [], 'https://example.com/other', 'GET');
 
         $responseFromDelegate = new Response('Not found', 404);

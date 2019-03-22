@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Reliv\ServeStatic;
+namespace Fduarte42\StaticFiles;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -11,7 +11,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 
-class ServeStaticMiddleware implements MiddlewareInterface
+class StaticFilesMiddleware implements MiddlewareInterface
 {
     /** @var \SplStack */
     protected $fileSystemAssetDirectoriesStack;
@@ -20,7 +20,7 @@ class ServeStaticMiddleware implements MiddlewareInterface
     protected $options;
 
     /**
-     * ServeStaticMiddleware constructor.
+     * StaticFilesMiddleware constructor.
      * @param array|string $fileSystemAssetDirectories
      * @param array $options
      */

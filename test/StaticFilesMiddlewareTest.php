@@ -1,6 +1,6 @@
 <?php
 
-namespace Reliv\ServeStaticTest;
+namespace Fduarte42\StaticFilesTest;
 
 require_once __DIR__ . '/../src/ContentTypes.php';
 require_once __DIR__ . '/../src/ContentTypes.php';
@@ -9,15 +9,15 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Reliv\ServeStatic\ServeStaticMiddleware;
+use Fduarte42\StaticFiles\StaticFilesMiddleware;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 
-class ServeStaticMiddlewareTest extends TestCase
+class StaticFilesMiddlewareTest extends TestCase
 {
     public function testRefusesToReturnFileThatIsOutsideTheAssetDirectoryForSecurity()
     {
-        $unit = new ServeStaticMiddleware(__DIR__ . '/public-test');
+        $unit = new StaticFilesMiddleware(__DIR__ . '/public-test');
         $request = new ServerRequest([], [], 'https://example.com/../secrets.php', 'GET');
         $responseFromDelegate = new Response();
 
@@ -35,7 +35,7 @@ class ServeStaticMiddlewareTest extends TestCase
 
     public function testReturnsFileContentAndProperHeadersWhenFileExistsAndIsValid()
     {
-        $unit = new ServeStaticMiddleware(__DIR__ . '/public-test');
+        $unit = new StaticFilesMiddleware(__DIR__ . '/public-test');
         $request = new ServerRequest([], [], 'https://example.com/test.json', 'GET');
 
         /** @var RequestHandlerInterface|MockObject $mockRequestHandler */
@@ -67,7 +67,7 @@ class ServeStaticMiddlewareTest extends TestCase
             __DIR__ . '/public-test'
         ];
 
-        $unit = new ServeStaticMiddleware($filesSystemAssetDirectories);
+        $unit = new StaticFilesMiddleware($filesSystemAssetDirectories);
         $request = new ServerRequest([], [], 'https://example.com/test2.json', 'GET');
 
         /** @var RequestHandlerInterface|MockObject $mockRequestHandler */
@@ -99,7 +99,7 @@ class ServeStaticMiddlewareTest extends TestCase
             __DIR__ . '/public-test2',
         ];
 
-        $unit = new ServeStaticMiddleware($filesSystemAssetDirectories);
+        $unit = new StaticFilesMiddleware($filesSystemAssetDirectories);
         $request = new ServerRequest([], [], 'https://example.com/test.json', 'GET');
 
         /** @var RequestHandlerInterface|MockObject $mockRequestHandler */

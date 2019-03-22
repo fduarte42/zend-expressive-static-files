@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Reliv\ServeStatic;
+namespace Fduarte42\StaticFiles;
 
 use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Zend\Stratigility\MiddlewarePipe;
 use function Zend\Stratigility\path;
 
-class ServeStaticMiddlewarePipeFactory
+class StaticFilesMiddlewarePipeFactory
 {
     /**
      * Load config and instantiate middleware
      *
      * Example config:
-     * 'serve_static' => [
+     * 'static_files' => [
      *      '/fun-module/assets' => [
      *          'fileSystemAssetDirectory' => [
      *                  __DIR__ . '/../vendor/fund-module/public'
@@ -32,7 +32,7 @@ class ServeStaticMiddlewarePipeFactory
     public function __invoke(ContainerInterface $container): MiddlewareInterface
     {
         $config = $container->has('config') ? $container->get('config') : [];
-        $config = isset($config['serve_static']) ? $config['serve_static'] : [];
+        $config = isset($config['static_files']) ? $config['static_files'] : [];
 
         $middlewarePipe = new MiddlewarePipe();
         foreach ($config as $uriPath => $options) {
@@ -43,13 +43,13 @@ class ServeStaticMiddlewarePipeFactory
             $fileSystemAssetDirectory = $options['fileSystemAssetDirectory'];
             unset($options['fileSystemAssetDirectory']);
 
-            $middlewarePipe->pipe(path($uriPath, new ServeStaticMiddleware(
+            $middlewarePipe->pipe(path($uriPath, new StaticFilesMiddleware(
                 $fileSystemAssetDirectory,
                 $options
             )));
         }
 
-        $middleware = new ServeStaticMiddlewarePipe($middlewarePipe);
+        $middleware = new StaticFilesMiddlewarePipe($middlewarePipe);
 
         return $middleware;
     }
