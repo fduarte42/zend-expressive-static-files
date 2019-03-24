@@ -1,4 +1,5 @@
 # Zend Expressive Static Files
+[![Build Status](https://travis-ci.com/fduarte42/zend-expressive-static-files.svg?branch=master)](https://travis-ci.com/fduarte42/zend-expressive-static-files)
 A PSR-15 middleware that serves static assets for you
 
 Example usage:
