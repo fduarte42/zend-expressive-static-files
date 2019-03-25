@@ -18,7 +18,7 @@ class ConfigProvider
     {
         return [
             'factories' => [
-                'serve-static-middleware-pipe' => StaticFilesMiddlewarePipeFactory::class,
+                'static-files-middleware-pipe' => StaticFilesMiddlewarePipeFactory::class,
             ],
         ];
     }
@@ -28,7 +28,7 @@ class ConfigProvider
     {
         return [
             [
-                'middleware' => 'serve-static-middleware-pipe',
+                'middleware' => 'static-files-middleware-pipe',
                 'priority' => 1000,
             ],
         ];
