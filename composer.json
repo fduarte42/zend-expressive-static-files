@@ -11,7 +11,7 @@
     "psr/http-server-middleware": "^1.0",
     "zendframework/zend-stratigility": "^3.0"
   },
-  "license": "BSD-3-Clause",
+  "license": "ISC",
   "authors": [
     {
       "name": "rodmcnew",
