@@ -15,7 +15,7 @@ class StaticFilesMiddlewarePipeFactory
      * Load config and instantiate middleware
      *
      * Example config:
-     * 'static_files' => [
+     * 'serve_static' => [
      *      '/fun-module/assets' => [
      *          'fileSystemAssetDirectory' => [
      *                  __DIR__ . '/../vendor/fund-module/public'
@@ -32,7 +32,7 @@ class StaticFilesMiddlewarePipeFactory
     public function __invoke(ContainerInterface $container): MiddlewareInterface
     {
         $config = $container->has('config') ? $container->get('config') : [];
-        $config = isset($config['static_files']) ? $config['static_files'] : [];
+        $config = isset($config['serve_static']) ? $config['serve_static'] : [];
 
         $middlewarePipe = new MiddlewarePipe();
         foreach ($config as $uriPath => $options) {

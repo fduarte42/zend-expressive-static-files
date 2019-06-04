@@ -33,7 +33,7 @@ class StaticFilesMiddlewarePipeTest extends TestCase
             ->method('get')
             ->with('config')
             ->willReturn([
-                'static_files' => [
+                'serve_static' => [
                     '/' => [
                         'fileSystemAssetDirectory' => __DIR__ . '/public-test',
                     ]
@@ -87,7 +87,7 @@ class StaticFilesMiddlewarePipeTest extends TestCase
             ->method('get')
             ->with('config')
             ->willReturn([
-                'static_files' => [
+                'serve_static' => [
                     '/files' => [
                         'fileSystemAssetDirectory' => __DIR__ . '/public-test',
                     ]
