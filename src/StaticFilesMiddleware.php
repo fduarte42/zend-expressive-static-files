@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fduarte42\StaticFiles;
 
+use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -50,9 +51,11 @@ class StaticFilesMiddleware implements MiddlewareInterface
     }
 
     /**
-     * @param ServerRequestInterface $request
+     * @param ServerRequestInterface  $request
      * @param RequestHandlerInterface $handler
+     *
      * @return ResponseInterface
+     * @throws Exception
      */
     public function process(
         ServerRequestInterface $request,
@@ -90,12 +93,26 @@ class StaticFilesMiddleware implements MiddlewareInterface
 
             // Write to publicCachePath if configured
             if ($this->options['publicCachePath'] !== null) {
-                $writePath = $this->options['publicCachePath'] . $uriSubPath;
-                $writeDir = dirname($writePath);
-                if (!is_dir($writeDir)) {
-                    mkdir($writeDir, 0777, true);
+                // create lock file
+                $lockfile = $this->options['publicCachePath'] . '/static.lock';
+                $lock = fopen($lockfile, 'c');
+
+                // try to aquire exclusive lock
+                if (flock($lock, LOCK_EX)) {
+                    $writePath = $this->options['publicCachePath'] . $uriSubPath;
+                    $writeDir = dirname($writePath);
+                    if (!is_dir($writeDir)) {
+                        mkdir($writeDir, 0777, true);
+                    }
+                    copy($filePath, $writePath);
+
+                    // unlock and remove lock file
+                    flock($lock, LOCK_UN);
+                    fclose($lock);
+                    @unlink($lockfile);
+                } else {
+                    throw new Exception('could not aquire file lock in publicCachePath');
                 }
-                copy($filePath, $writePath);
             }
 
             // Build response as stream
