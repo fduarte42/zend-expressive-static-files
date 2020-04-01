@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fduarte42\StaticFiles;
 
+use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Zend\Stratigility\MiddlewarePipe;
@@ -37,7 +38,7 @@ class StaticFilesMiddlewarePipeFactory
         $middlewarePipe = new MiddlewarePipe();
         foreach ($config as $uriPath => $options) {
             if (!array_key_exists('fileSystemAssetDirectory', $options)) {
-                throw new \InvalidArgumentException('key "fileSystemAssetDirectory" missing in config');
+                throw new InvalidArgumentException('key "fileSystemAssetDirectory" missing in config');
             }
 
             $fileSystemAssetDirectory = $options['fileSystemAssetDirectory'];
@@ -49,8 +50,6 @@ class StaticFilesMiddlewarePipeFactory
             )));
         }
 
-        $middleware = new StaticFilesMiddlewarePipe($middlewarePipe);
-
-        return $middleware;
+        return new StaticFilesMiddlewarePipe( $middlewarePipe);
     }
 }

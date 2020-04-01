@@ -40,7 +40,11 @@ class StaticFilesMiddleware implements MiddlewareInterface
                 'publicCachePath' => null,
                 'headers' => [
                     //headerKey => headerValue
-                ]
+                ],
+                'ignoredExtensions' => [
+                    'php',
+                    'phtml',
+                ],
             ],
             $options
         );
@@ -63,6 +67,10 @@ class StaticFilesMiddleware implements MiddlewareInterface
     ): ResponseInterface
     {
         $uriSubPath = $request->getUri()->getPath();
+
+        if (in_array(pathinfo($uriSubPath)['extension'], $this->options['ignoredExtensions'])) {
+            return $handler->handle($request);
+        }
 
         // Ensure we have been given a file path to look for
         if (empty($uriSubPath)) {
@@ -93,25 +101,30 @@ class StaticFilesMiddleware implements MiddlewareInterface
 
             // Write to publicCachePath if configured
             if ($this->options['publicCachePath'] !== null) {
-                // create lock file
-                $lockfile = $this->options['publicCachePath'] . '/static.lock';
-                $lock = fopen($lockfile, 'c');
-
-                // try to aquire exclusive lock
-                if (flock($lock, LOCK_EX)) {
-                    $writePath = $this->options['publicCachePath'] . $uriSubPath;
-                    $writeDir = dirname($writePath);
-                    if (!is_dir($writeDir)) {
-                        mkdir($writeDir, 0777, true);
-                    }
-                    copy($filePath, $writePath);
-
-                    // unlock and remove lock file
-                    flock($lock, LOCK_UN);
-                    fclose($lock);
-                    @unlink($lockfile);
+                // do not overwrite file in public cache
+                if (file_exists($this->options['publicCachePath'] . $uriSubPath)) {
+                    $filePath = $this->options['publicCachePath'] . $uriSubPath;
                 } else {
-                    throw new Exception('could not aquire file lock in publicCachePath');
+                    // create lock file
+                    $lockfile = $this->options['publicCachePath'] . '/static.lock';
+                    $lock = fopen($lockfile, 'c');
+
+                    // try to aquire exclusive lock
+                    if (flock($lock, LOCK_EX)) {
+                        $writePath = $this->options['publicCachePath'] . $uriSubPath;
+                        $writeDir = dirname($writePath);
+                        if (!is_dir($writeDir)) {
+                            mkdir($writeDir, 0777, true);
+                        }
+                        copy($filePath, $writePath);
+
+                        // unlock and remove lock file
+                        flock($lock, LOCK_UN);
+                        fclose($lock);
+                        @unlink($lockfile);
+                    } else {
+                        throw new Exception('could not aquire file lock in publicCachePath');
+                    }
                 }
             }
 
