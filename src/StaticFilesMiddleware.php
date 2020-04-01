@@ -9,12 +9,13 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use SplStack;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Stream;
 
 class StaticFilesMiddleware implements MiddlewareInterface
 {
-    /** @var \SplStack */
+    /** @var SplStack */
     protected $fileSystemAssetDirectoriesStack;
 
     /** @var array */
@@ -29,7 +30,7 @@ class StaticFilesMiddleware implements MiddlewareInterface
     {
         $fileSystemAssetDirectories = is_array($fileSystemAssetDirectories) ? $fileSystemAssetDirectories : [$fileSystemAssetDirectories];
 
-        $this->fileSystemAssetDirectoriesStack = new \SplStack();
+        $this->fileSystemAssetDirectoriesStack = new SplStack();
 
         foreach ($fileSystemAssetDirectories as $fileSystemAssetDirectory) {
             $this->fileSystemAssetDirectoriesStack->push($fileSystemAssetDirectory);
