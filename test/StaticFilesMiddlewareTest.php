@@ -23,7 +23,7 @@ class StaticFilesMiddlewareTest extends TestCase
     {
         $unit = new StaticFilesMiddleware(__DIR__ . '/public-test');
         $request = new ServerRequest([], [], 'https://example.com/../secrets.php', 'GET');
-        $responseFromDelegate = new Response();
+        $responseFromDelegate = new Response\EmptyResponse();
 
         /** @var RequestHandlerInterface|MockObject $mockRequestHandler */
         $mockRequestHandler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
@@ -75,7 +75,7 @@ class StaticFilesMiddlewareTest extends TestCase
         $unit = new StaticFilesMiddleware(__DIR__ . '/public-test3');
         $request = new ServerRequest([], [], 'https://example.com/index.php', 'GET');
 
-        $responseFromDelegate = new Response();
+        $responseFromDelegate = new Response\EmptyResponse();
 
         /** @var RequestHandlerInterface|MockObject $mockRequestHandler */
         $mockRequestHandler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();

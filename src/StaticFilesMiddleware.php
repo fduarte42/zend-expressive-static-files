@@ -39,6 +39,7 @@ class StaticFilesMiddleware implements MiddlewareInterface
         $this->options = array_merge(
             [
                 'publicCachePath' => null,
+                'rootPath' => '..',
                 'headers' => [
                     //headerKey => headerValue
                 ],
@@ -100,7 +101,7 @@ class StaticFilesMiddleware implements MiddlewareInterface
                 continue;
             }
 
-            // Write to publicCachePath if configured
+            // create symlink in publicCachePath if configured
             if ($this->options['publicCachePath'] !== null) {
                 // do not overwrite file in public cache
                 if (file_exists($this->options['publicCachePath'] . $uriSubPath)) {
@@ -117,7 +118,29 @@ class StaticFilesMiddleware implements MiddlewareInterface
                         if (!is_dir($writeDir)) {
                             mkdir($writeDir, 0777, true);
                         }
-                        copy($filePath, $writePath);
+                        // check if rootPath is absolute
+                        if ($this->options['rootPath']{0} === '/') {
+                            $link = str_replace(
+                                realpath(rtrim($this->options['rootPath'], '/')) . '/',
+                                '../',
+                                $filePath
+                            );
+                        } else {
+                            $link = str_replace(
+                                rtrim(
+                                    realpath(
+                                        rtrim(
+                                            $this->options['publicCachePath'] . '/' . $this->options['rootPath'],
+                                            '/'
+                                        )
+                                    ),
+                                    '/'
+                                ) . '/',
+                                '../',
+                                $filePath
+                            );
+                        }
+                        symlink($link, $writePath);
 
                         // unlock and remove lock file
                         flock($lock, LOCK_UN);
@@ -131,7 +154,7 @@ class StaticFilesMiddleware implements MiddlewareInterface
 
             // Build response as stream
             $body = new Stream($filePath);
-            $response = new Response();
+            $response = new Response\EmptyResponse();
             $response = $response->withBody($body);
 
             // Add content type if known

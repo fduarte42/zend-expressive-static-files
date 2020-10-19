@@ -44,7 +44,7 @@ class StaticFilesMiddlewarePipeTest extends TestCase
         $middlewarePipe = (new StaticFilesMiddlewarePipeFactory)($container);
         $request = new ServerRequest([], [], 'https://example.com/test.json', 'GET');
 
-        $responseFromDelegate = new Response();
+        $responseFromDelegate = new Response\EmptyResponse();
 
         /** @var RequestHandlerInterface|MockObject $mockRequestHandler */
         $mockRequestHandler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
@@ -98,7 +98,7 @@ class StaticFilesMiddlewarePipeTest extends TestCase
         $middlewarePipe = (new StaticFilesMiddlewarePipeFactory)($container);
         $request = new ServerRequest([], [], 'https://example.com/other', 'GET');
 
-        $responseFromDelegate = new Response('Not found', 404);
+        $responseFromDelegate = new Response\TextResponse('Not found', 404);
 
         /** @var RequestHandlerInterface|MockObject $mockRequestHandler */
         $mockRequestHandler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
@@ -146,7 +146,7 @@ class StaticFilesMiddlewarePipeTest extends TestCase
         $middlewarePipe = (new StaticFilesMiddlewarePipeFactory)($container);
         $request = new ServerRequest([], [], 'https://example.com/test.json', 'GET');
 
-        $responseFromDelegate = new Response();
+        $responseFromDelegate = new Response\EmptyResponse();
 
         /** @var RequestHandlerInterface|MockObject $mockRequestHandler */
         $mockRequestHandler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
@@ -175,4 +175,119 @@ class StaticFilesMiddlewarePipeTest extends TestCase
         );
     }
 
+    public function testCreatesSymLinkInPublicCache()
+    {
+        /** @var ContainerInterface|MockObject $container */
+        $container = $this->getMockBuilder(ContainerInterface::class)->getMock();
+
+        $container->expects($this->once())
+            ->method('has')
+            ->with('config')
+            ->willReturn(true);
+
+        $container->expects($this->once())
+            ->method('get')
+            ->with('config')
+            ->willReturn([
+                'serve_static' => [
+                    '/' => [
+                        'fileSystemAssetDirectory' => __DIR__ . '/public-test',
+                        'publicCachePath' => __DIR__ . '/empty-cache',
+                    ]
+                ]
+            ]);
+
+        /** @var MiddlewarePipeInterface $middlewarePipe */
+        $middlewarePipe = (new StaticFilesMiddlewarePipeFactory)($container);
+        $request = new ServerRequest([], [], 'https://example.com/test.json', 'GET');
+
+        $responseFromDelegate = new Response\EmptyResponse();
+
+        /** @var RequestHandlerInterface|MockObject $mockRequestHandler */
+        $mockRequestHandler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
+        $mockRequestHandler
+            //->expects($this->never())
+            ->method('handle')
+            ->with($request)
+            ->willReturn($responseFromDelegate);
+
+        /**
+         * @var $responseFromUnit ResponseInterface
+         */
+        $responseFromUnit = $middlewarePipe->process($request, $mockRequestHandler);
+
+        $expectedFileContents = file_get_contents(__DIR__ . '/empty-cache/test.json');
+
+        $responseFromUnit->getBody()->rewind();
+        $this->assertEquals(
+            $expectedFileContents,
+            $responseFromUnit->getBody()->getContents()
+        );
+
+        $this->assertEquals(
+            $responseFromUnit->getHeaders(),
+            ['content-type' => ['application/json']]
+        );
+
+        unlink(__DIR__ . '/empty-cache/test.json');
+    }
+
+
+    public function testCreatesSymLinkInPublicCacheWithAbsoluteRootPath()
+    {
+        /** @var ContainerInterface|MockObject $container */
+        $container = $this->getMockBuilder(ContainerInterface::class)->getMock();
+
+        $container->expects($this->once())
+            ->method('has')
+            ->with('config')
+            ->willReturn(true);
+
+        $container->expects($this->once())
+            ->method('get')
+            ->with('config')
+            ->willReturn([
+                'serve_static' => [
+                    '/' => [
+                        'fileSystemAssetDirectory' => __DIR__ . '/public-test',
+                        'publicCachePath' => __DIR__ . '/empty-cache',
+                        'rootPath' => __DIR__
+                    ]
+                ]
+            ]);
+
+        /** @var MiddlewarePipeInterface $middlewarePipe */
+        $middlewarePipe = (new StaticFilesMiddlewarePipeFactory)($container);
+        $request = new ServerRequest([], [], 'https://example.com/test.json', 'GET');
+
+        $responseFromDelegate = new Response\EmptyResponse();
+
+        /** @var RequestHandlerInterface|MockObject $mockRequestHandler */
+        $mockRequestHandler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
+        $mockRequestHandler
+            //->expects($this->never())
+            ->method('handle')
+            ->with($request)
+            ->willReturn($responseFromDelegate);
+
+        /**
+         * @var $responseFromUnit ResponseInterface
+         */
+        $responseFromUnit = $middlewarePipe->process($request, $mockRequestHandler);
+
+        $expectedFileContents = file_get_contents(__DIR__ . '/empty-cache/test.json');
+
+        $responseFromUnit->getBody()->rewind();
+        $this->assertEquals(
+            $expectedFileContents,
+            $responseFromUnit->getBody()->getContents()
+        );
+
+        $this->assertEquals(
+            $responseFromUnit->getHeaders(),
+            ['content-type' => ['application/json']]
+        );
+
+        unlink(__DIR__ . '/empty-cache/test.json');
+    }
 }
