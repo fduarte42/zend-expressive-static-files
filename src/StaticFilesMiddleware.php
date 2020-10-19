@@ -119,7 +119,7 @@ class StaticFilesMiddleware implements MiddlewareInterface
                             mkdir($writeDir, 0777, true);
                         }
                         // check if rootPath is absolute
-                        if ($this->options['rootPath']{0} === '/') {
+                        if ($this->options['rootPath'][0] === '/') {
                             $link = str_replace(
                                 realpath(rtrim($this->options['rootPath'], '/')) . '/',
                                 '../',
