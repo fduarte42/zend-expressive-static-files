@@ -122,7 +122,7 @@ class StaticFilesMiddleware implements MiddlewareInterface
                         if ($this->options['rootPath'][0] === '/') {
                             $link = str_replace(
                                 realpath(rtrim($this->options['rootPath'], '/')) . '/',
-                                '../',
+                                str_repeat('../', substr_count($uriSubPath, '/')),
                                 $filePath
                             );
                         } else {
@@ -136,7 +136,7 @@ class StaticFilesMiddleware implements MiddlewareInterface
                                     ),
                                     '/'
                                 ) . '/',
-                                '../',
+                                str_repeat('../', substr_count($uriSubPath, '/')),
                                 $filePath
                             );
                         }
