@@ -118,29 +118,35 @@ class StaticFilesMiddleware implements MiddlewareInterface
                         if (!is_dir($writeDir)) {
                             mkdir($writeDir, 0777, true);
                         }
-                        // check if rootPath is absolute
-                        if ($this->options['rootPath'][0] === '/') {
-                            $link = str_replace(
-                                realpath(rtrim($this->options['rootPath'], '/')) . '/',
-                                str_repeat('../', substr_count($uriSubPath, '/')),
-                                $filePath
-                            );
+
+                        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                            // don't use symlinks on windows
+                            copy($filePath, $writePath);
                         } else {
-                            $link = str_replace(
-                                rtrim(
-                                    realpath(
-                                        rtrim(
-                                            $this->options['publicCachePath'] . '/' . $this->options['rootPath'],
-                                            '/'
-                                        )
-                                    ),
-                                    '/'
-                                ) . '/',
-                                str_repeat('../', substr_count($uriSubPath, '/')),
-                                $filePath
-                            );
+                            // check if rootPath is absolute
+                            if ($this->options['rootPath'][0] === '/') {
+                                $link = str_replace(
+                                    realpath(rtrim($this->options['rootPath'], '/')) . '/',
+                                    str_repeat('../', substr_count($uriSubPath, '/')),
+                                    $filePath
+                                );
+                            } else {
+                                $link = str_replace(
+                                    rtrim(
+                                        realpath(
+                                            rtrim(
+                                                $this->options['publicCachePath'] . '/' . $this->options['rootPath'],
+                                                '/'
+                                            )
+                                        ),
+                                        '/'
+                                    ) . '/',
+                                    str_repeat('../', substr_count($uriSubPath, '/')),
+                                    $filePath
+                                );
+                            }
+                            symlink($link, $writePath);
                         }
-                        symlink($link, $writePath);
 
                         // unlock and remove lock file
                         flock($lock, LOCK_UN);
