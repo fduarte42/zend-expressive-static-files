@@ -108,7 +108,7 @@ class StaticFilesMiddleware implements MiddlewareInterface
                     $filePath = $this->options['publicCachePath'] . $uriSubPath;
                 } else {
                     // create lock file
-                    $lockfile = $this->options['publicCachePath'] . '/static.lock';
+                    $lockfile = $this->options['publicCachePath'] . '/' . md5($uriSubPath) . '.lock';
                     $lock = fopen($lockfile, 'c');
 
                     // try to aquire exclusive lock
