@@ -160,8 +160,7 @@ class StaticFilesMiddleware implements MiddlewareInterface
 
             // Build response as stream
             $body = new Stream($filePath);
-            $response = new Response\EmptyResponse();
-            $response = $response->withBody($body);
+            $response = new Response($body);
 
             // Add content type if known
             $extension = pathinfo($filePath)['extension'];
