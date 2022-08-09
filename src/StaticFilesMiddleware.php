@@ -116,7 +116,7 @@ class StaticFilesMiddleware implements MiddlewareInterface
                         $writePath = $this->options['publicCachePath'] . $uriSubPath;
                         $writeDir = dirname($writePath);
                         if (!is_dir($writeDir)) {
-                            mkdir($writeDir, 0777, true);
+                            @mkdir($writeDir, 0777, true);
                         }
 
                         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
